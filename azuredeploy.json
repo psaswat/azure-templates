@@ -1,0 +1,80 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The environment that these resources will be deployed to."
+      }
+    }
+  },
+  "variables": {
+    "mcapiName": "[concat('mc-', parameters('environment'), '-api')]",
+    "calculationApiNAme": "[concat('mccalc-', parameters('environment'), '-api')]",
+    "mcdbName": "[concat('mc-', parameters('environment'), '-db')]",
+    "sqlServerName": "[concat('mc-', parameters('environment'), '-dbserver')]",
+    "appServicePlanName": "[concat('mc-', parameters('environment'), '-appserviceplan')]",
+    "appServicePlanSku": "",
+    "appServicePlanSkuName": "S3",
+    "appServicePlanSize": "S3",
+    "appServicePlanTier": "Standard",
+    "appServicePlanFamily": "S",
+    "appServicePlanCapacity": 1
+  },
+  "resources": [
+    {
+      "comments": "Generated from ARM template",
+      "type": "Microsoft.Web/serverfarms",
+      "sku": {
+        "name": "[variables('appServicePlanSkuName')]",
+        "tier": "[variables('appServicePlanTier')]",
+        "size": "[variables('appServicePlanSize')]",
+        "family": "[variables('appServicePlanFamily')]",
+        "capacity": "[variables('appServicePlanCapacity')]"
+      },
+
+      "kind": "app",
+      "name": "[variables('appServicePlanName')]",
+      "apiVersion": "2015-08-01",
+      "location": "West US",
+      "scale": null,
+      "properties": {
+        "name": "[variables('appServicePlanName')]",
+        "numberOfWorkers": 1
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "Generated from ARM template",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "[variables('mcapiName')]",
+      "apiVersion": "2015-08-01",
+      "location": "West US",
+      "tags": {
+        "hidden-related:/subscriptions/aed89786-c23c-4d7f-a306-a3bd7e0897ae/resourcegroups/awesome-dev-rg/providers/Microsoft.Web/serverfarms/AweomeServicePlan": "empty",
+        "displayName": "API App",
+        "env": "[parameters('environment')]"
+      },
+      "scale": null,
+      "properties": {
+        "name": "[variables('mcapiName')]",
+        "hostNames": [
+          "[concat(variables('mcapiName'), '.azurewebsites.net')]"
+        ],
+        "enabledHostNames": [
+          "[concat(variables('mcapiName'), '.azurewebsites.net')]",
+          "[concat(variables('mcapiName'), '.scm.azurewebsites.net')]"
+        ],
+        
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      ]
+    }
+   
+  ]
+}
